@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendário</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="manifest" href="site.webmanifest">
+    <style>
+        * {
+            font-family: arial;
+        }
+        h1 {
+            display: flex;
+            align-items: center;
+        }
+        h1 button {
+            height: 25px;
+        }
+        h3 {
+            margin: 0;
+        }
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+        }
+        .day {
+            border: 1px solid #ccc;
+            padding: 5px;
+            text-align: center;
+            cursor: pointer;
+        }
+        .green {
+            background-color: green;
+        }
+        .red {
+            background-color: red;
+        }
+        .yellow {
+            background-color: yellow;
+        }
+        .legenda {
+            display: flex;
+            flex-direction: column;
+            justify-items: center;
+            margin-bottom: 10px;
+        }
+        .legenda .sla {
+            width: 30px;
+            height: 30px;
+            margin: 5px;
+        }
+        .divi {
+            display: flex;
+            align-items: center;
+        }
+        button {
+            margin: 10px;
+            background-color: transparent;
+            outline: 0;
+            border: 1px solid #000;
+            height: 30px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Mês de Novembro <button id="editar">✏</button></h1>
+
+    <div class="legenda">
+        <div class="divi">
+            <h3>Dia Bom:</h3>
+            <div class="green sla"></div>
+        </div>
+        <div class="divi">
+            <h3>Dia Ruim:</h3>
+            <div class="red sla"></div>
+        </div>
+        <div class="divi">
+            <h3>Dia Neutro:</h3>
+            <div class="yellow sla"></div>
+        </div>
+    </div>
+
+    <div class="calendar" id="calendar"></div>
+
+    <button id="clearButton">Resetar</button>
+
+    <script>
+        const calendar = document.getElementById("calendar");
+
+        // Recupera as cores do localStorage
+        const storedColors = JSON.parse(localStorage.getItem("calendarColors")) || {};
+
+        // Função para definir a cor de um dia
+        function setDayColor(dayElement, day) {
+            if (storedColors[day]) {
+                dayElement.className = `day ${storedColors[day]}`;
+            }
+
+            dayElement.addEventListener("click", () => {
+                const colors = ["green", "red", "yellow"];
+                let currentColor = dayElement.className.split(" ")[1];
+
+                if (!currentColor || !colors.includes(currentColor)) {
+                    currentColor = colors[0];
+                } else {
+                    const currentIndex = colors.indexOf(currentColor);
+                    currentColor = colors[(currentIndex + 1) % colors.length];
+                }
+
+                dayElement.className = `day ${currentColor}`;
+                storedColors[day] = currentColor;
+
+                // Armazena as cores no localStorage
+                localStorage.setItem("calendarColors", JSON.stringify(storedColors));
+            });
+        }
+
+        // Cria os dias do calendário
+        for (let day = 1; day <= 30; day++) {
+            const dayElement = document.createElement("div");
+            dayElement.textContent = day;
+            dayElement.classList.add("day");
+            setDayColor(dayElement, day);
+            calendar.appendChild(dayElement);
+        }
+
+         // Função para limpar os dados do armazenamento local
+        function clearLocalStorage() {
+            localStorage.removeItem('calendarColors');
+            // Restaurar as cores padrão
+            const days = document.querySelectorAll('td');
+            days.forEach((day, index) => {
+                day.className = ''; // Remover todas as classes
+            });
+        }
+
+        // Lidar com o clique no botão de limpar
+        const clearButton = document.getElementById('clearButton');
+        clearButton.addEventListener('click', function() {
+            clearLocalStorage();
+            location.reload();
+        });
+    </script>
+</body>
+</html>
